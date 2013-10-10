@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "/Users/berk/Work/VTK/tbb")
 find_package(TBB REQUIRED)
 
 find_package(VTK REQUIRED)
@@ -21,4 +22,4 @@ add_executable(register_thread_safety register_thread_safety.cxx)
 target_link_libraries(register_thread_safety ${TBB_LIBRARY} vtkFiltersCore vtkImagingCore)
 
 add_executable(parallel_amr parallel_amr.cxx)
-target_link_libraries(parallel_amr ${TBB_LIBRARY} vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
+target_link_libraries(parallel_amr ${TBB_LIBRARY} vtkIOAMR vtkIOXML vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)

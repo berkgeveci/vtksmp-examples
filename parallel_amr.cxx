@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "tbb/parallel_for.h"
 #include "tbb/blocked_range.h"
+#include "tbb/task_scheduler_init.h"
 
 #include <vtkSynchronizedTemplates3D.h>
 #include <vtkAMRFlashReader.h>
@@ -104,6 +105,9 @@ public:
         }
       inInfoVec->Delete();
       outInfoVec->Delete();
+      request1->Delete();
+      request2->Delete();
+      request3->Delete();
     }
   GenerateContour(vtkImageData** s, vtkPolyData** opts,
                   vtkSynchronizedTemplates3D* cf) :
@@ -115,8 +119,10 @@ public:
 
 int main()
 {
+  tbb::task_scheduler_init Init(8);
+
   vtkNew<vtkAMRFlashReader> reader;
-  reader->SetFileName("/Users/berk/Desktop/smooth/smooth.flash");
+  reader->SetFileName("/Users/berk/Datasets/smooth/smooth.flash");
   reader->SetMaxLevel(7);
   reader->SetCellArrayStatus("dens", 1);
   reader->Update();
@@ -154,7 +160,7 @@ int main()
   blocked_range<size_t> range(0, images.size());
 
   vtkTimerLog::MarkStartEvent("serial");
-  gc(range);
+  //gc(range);
   vtkTimerLog::MarkEndEvent("serial");
 
   for (iter2 = outputs.begin();
