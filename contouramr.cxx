@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include "tbb/parallel_for.h"
-#include "tbb/blocked_range.h"
 #include "vtkCellDataToPointData.h"
 
 #include <vtkSynchronizedTemplates3D.h>
@@ -17,13 +15,14 @@
 #include <vtkTimerLog.h>
 #include "vtkNew.h"
 #include "vtkSmartPointer.h"
-#include "vtkParallelFor.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkMutexLock.h"
 #include "vtkAMREnzoReader.h"
 #include "vtkAMRFlashReader.h"
 #include "vtkCompositeDataIterator.h"
-using namespace tbb;
+#include "vtkMultiThreader.h"
+#include "vtkParallelUtilities.h"
+
 using namespace std;
 
 static const size_t N = 2000;
@@ -36,7 +35,6 @@ int main(int argc, char* argv[])
   bool bigData = false;
   bool threadedCompositePipeline = true;
   int numThreads=0;
-  bool noTbb = false;
   string filename;
 
   for(int argi=1; argi<argc; argi++)
@@ -57,10 +55,6 @@ int main(int argc, char* argv[])
       {
       numThreads=atoi(argv[++argi]);
       }
-    else if(string(argv[argi])=="--noTbb")
-      {
-      noTbb = true;
-      }
     else
       {
       cout<<"Say shat?"<<endl;
@@ -74,13 +68,18 @@ int main(int argc, char* argv[])
     threadedCompositePipeline = false;
     }
 
+  if (threadedCompositePipeline)
+    {
+    vtkParallelUtilities::Initialize(numThreads);
+    }
+
   string fname;
   string scalar_name;
   vtkSmartPointer<vtkAMRBaseReader> reader;
   double contourValue(0);
   if(bigData)
     {
-    fname = "/home/leo/pvdata/smooth.flash";
+    fname = "/Users/berk/Datasets/smooth/smooth.flash";
     scalar_name = "dens";
     reader = vtkSmartPointer<vtkAMRFlashReader>::New();
     contourValue = 3000.0;
@@ -98,7 +97,6 @@ int main(int argc, char* argv[])
   cout<<"data set: "<<fname<<", "<<scalar_name<<endl;
   cout<<"threadedCompositePipeline "<<threadedCompositePipeline<<endl;
   cout<<"numThreads: "<<numThreads<<endl;
-  cout<<"noTbb: "<<noTbb<<endl;
   if(filename!="")
     {
     cout<<filename<<endl;
@@ -110,7 +108,7 @@ int main(int argc, char* argv[])
     }
   reader->SetFileName(fname.c_str());
   reader->SetCellArrayStatus(scalar_name.c_str(),1);
-  reader->SetMaxLevel(5);
+  reader->SetMaxLevel(7);
   reader->Update();
   cout<<"Done reading AMR"<<endl;
   int total_blocks(0);
@@ -131,7 +129,6 @@ int main(int argc, char* argv[])
   if(threadedCompositePipeline)
     {
     vtkNew<vtkThreadedCompositeDataPipeline> exec;
-    vtkThreadedCompositeDataPipeline::UseTBB = !noTbb;
     vtkAlgorithm::SetDefaultExecutivePrototype(exec.GetPointer());
     }
   else

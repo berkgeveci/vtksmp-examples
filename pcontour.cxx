@@ -21,7 +21,6 @@
 #include <vtkTimerLog.h>
 #include "vtkNew.h"
 #include "vtkSmartPointer.h"
-#include "vtkParallelFor.h"
 #include "vtkMultiBlockDataSet.h"
 #include "vtkMutexLock.h"
 #include "vtkCompositeDataIterator.h"
@@ -40,7 +39,7 @@
 #include "vtkCutter.h"
 #include "vtkContourGrid.h"
 #include "vtkThreshold.h"
-#include "vtkPointSetNormalEstimation.h"
+// #include "vtkPointSetNormalEstimation.h"
 #include "vtkCurvatures.h"
 #include "vtkMarchingCubes.h"
 #include "vtkFloatArray.h"
@@ -299,11 +298,11 @@ vtkSmartPointer<vtkAlgorithm> CreateTestFilter(const string& filterName)
     vtkNew<vtkPointDataToCellData> filter;
     return filter.GetPointer();
     }
-  else if(filterName ==string("normal"))
-    {
-    vtkNew<vtkPointSetNormalEstimation> filter;
-    return filter.GetPointer();
-    }
+  // else if(filterName ==string("normal"))
+  //   {
+  //   vtkNew<vtkPointSetNormalEstimation> filter;
+  //   return filter.GetPointer();
+  //   }
   else if(filterName ==string("surf"))
     {
     vtkNew<vtkGeometryFilter> filter;
@@ -322,7 +321,6 @@ int main(int argc, char* argv[])
   int extent = 10;
   bool dumpOutput = false;
   int numChunks(64);
-  bool noTbb(false);
   bool superNova(false);
   bool noMerge(false);
   string filterName = "sync";
@@ -344,10 +342,6 @@ int main(int argc, char* argv[])
     else if(string(argv[argi])=="--numChunks")
       {
       numChunks=atoi(argv[++argi]);
-      }
-    else if(string(argv[argi])=="--noTbb")
-      {
-      noTbb = true;
       }
     else if(string(argv[argi])=="--noMerge")
       {
@@ -451,16 +445,8 @@ int main(int argc, char* argv[])
     tbb::blocked_range<int> range(0, chunks.Size());
     FilterTask task(filter.GetPointer(),chunks);
 
-    if(noTbb)
-      {
-      vtkMultiThreader::SetGlobalDefaultNumberOfThreads(numThreads);
-      vtkParallelFor(range,task);
-      }
-    else
-      {
-      tbb::task_scheduler_init init(numThreads);
-      parallel_for(range,task);
-      }
+    tbb::task_scheduler_init init(numThreads);
+    parallel_for(range,task);
 
     vtkNew<vtkTimerLog> timer1;
     timer1->StartTimer();

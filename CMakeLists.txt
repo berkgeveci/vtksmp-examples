@@ -22,23 +22,24 @@ target_link_libraries(contouramr ${TBB_LIBRARY}  vtkIOAMR vtkIOXML vtkFiltersAMR
 add_executable(serial-contouramr serial-contouramr.cxx)
 target_link_libraries(serial-contouramr ${TBB_LIBRARY}  vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
 
-add_executable(threaded_streamtrace threaded_streamtrace.cxx)
-target_link_libraries(threaded_streamtrace ${TBB_LIBRARY} vtkIOLegacy vtkImagingGeneral vtkFiltersFlowPaths vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
+# add_executable(threaded_streamtrace threaded_streamtrace.cxx)
+# target_link_libraries(threaded_streamtrace ${TBB_LIBRARY} vtkIOLegacy vtkImagingGeneral vtkFiltersFlowPaths vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
 
-add_executable(pcontour pcontour.cxx vtkPointSetNormalEstimation.cxx)
-target_link_libraries(pcontour ${TBB_LIBRARY} vtkFiltersGeneral vtkIOLegacy vtkImagingGeneral vtkFiltersFlowPaths vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
+#add_executable(pcontour pcontour.cxx vtkPointSetNormalEstimation.cxx)
+#add_executable(pcontour pcontour.cxx)
+#target_link_libraries(pcontour ${TBB_LIBRARY} vtkFiltersGeneral vtkIOLegacy vtkImagingGeneral vtkFiltersFlowPaths vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
 
-add_executable(arraytest arraytest.cxx)
-target_link_libraries(arraytest ${TBB_LIBRARY} vtkFiltersGeneral vtkIOLegacy vtkImagingGeneral vtkFiltersFlowPaths vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
+# add_executable(arraytest arraytest.cxx)
+# target_link_libraries(arraytest ${TBB_LIBRARY} vtkFiltersGeneral vtkIOLegacy vtkImagingGeneral vtkFiltersFlowPaths vtkIOAMR vtkIOXML vtkFiltersAMR vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
 
-add_executable(atomic_example atomic_example.cxx)
-target_link_libraries(atomic_example ${TBB_LIBRARY} vtkCommonCore)
+# add_executable(atomic_example atomic_example.cxx)
+# target_link_libraries(atomic_example ${TBB_LIBRARY} vtkCommonCore)
 
-add_executable(register_thread_safety register_thread_safety.cxx)
-target_link_libraries(register_thread_safety ${TBB_LIBRARY} vtkFiltersCore vtkImagingCore)
+# add_executable(register_thread_safety register_thread_safety.cxx)
+# target_link_libraries(register_thread_safety ${TBB_LIBRARY} vtkFiltersCore vtkImagingCore)
 
 add_executable(parallel_amr parallel_amr.cxx)
 target_link_libraries(parallel_amr ${TBB_LIBRARY} vtkIOAMR vtkIOXML vtkRenderingVolumeOpenGL vtkRenderingFreeTypeOpenGL vtkInteractionStyle)
 
-add_executable(testparallelfor testparallelfor.cxx)
-target_link_libraries(testparallelfor ${TBB_LIBRARY} vtkFiltersCore pthread)
+# add_executable(testparallelfor testparallelfor.cxx)
+# target_link_libraries(testparallelfor ${TBB_LIBRARY} vtkFiltersCore pthread)
