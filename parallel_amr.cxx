@@ -1,9 +1,6 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
-#include "tbb/parallel_for.h"
-#include "tbb/blocked_range.h"
-#include "tbb/task_scheduler_init.h"
 
 #include <vtkSynchronizedTemplates3D.h>
 #include <vtkAMRFlashReader.h>
@@ -26,7 +23,8 @@
 #include <vtkNew.h>
 #include <vtkSmartPointer.h>
 
-using namespace tbb;
+#include <vtkSMPTools.h>
+
 using namespace std;
 
 static const size_t GRAIN = 20;
@@ -38,7 +36,7 @@ class GenerateContour
   vtkSynchronizedTemplates3D* ContourFilter;
 
 public:
-  void operator() ( const blocked_range<size_t>& r ) const
+  void operator() ( vtkIdType begin, vtkIdType end )
     {
       vtkImageData** images = this->Images;
       vtkPolyData** outputs = this->Outputs;
@@ -65,7 +63,7 @@ public:
 
       vtkNew<vtkCellDataToPointData> c2p;
 
-      for ( size_t i = r.begin(); i != r.end(); ++i )
+      for ( vtkIdType i = begin; i != end; ++i )
         {
         vtkImageData* image = images[i];
 
@@ -117,9 +115,28 @@ public:
 };
 
 
-int main()
+int main(int argc, char* argv[])
 {
-  tbb::task_scheduler_init Init(8);
+  int numThreads=0;
+
+  for(int argi=1; argi<argc; argi++)
+    {
+    if(string(argv[argi])=="--numThreads")
+      {
+      numThreads=atoi(argv[++argi]);
+      }
+    else
+      {
+      cout<<"Say shat?"<<endl;
+      return 1;
+      }
+    }
+
+  //not doing multithreading by default
+  if(numThreads>0)
+    {
+    vtkSMPTools::Initialize(numThreads);
+    }
 
   vtkNew<vtkAMRFlashReader> reader;
   reader->SetFileName("/Users/berk/Datasets/smooth/smooth.flash");
@@ -157,11 +174,14 @@ int main()
   cf->SetValue(0, 3000);
 
   GenerateContour gc( &images[0], &outputs[0], cf.GetPointer() );
-  blocked_range<size_t> range(0, images.size());
 
-  vtkTimerLog::MarkStartEvent("serial");
-  //gc(range);
-  vtkTimerLog::MarkEndEvent("serial");
+  vtkNew<vtkTimerLog> tl;
+
+  tl->StartTimer();
+  //gc(0, images.size());
+  tl->StopTimer();
+
+  cout << "serial: " << tl->GetElapsedTime() << endl;
 
   for (iter2 = outputs.begin();
        iter2 != outputs.end();
@@ -171,11 +191,11 @@ int main()
     *iter2 = vtkPolyData::New();
     }
 
-  vtkTimerLog::MarkStartEvent("parallel");
-  parallel_for(blocked_range<size_t>(0, images.size(), GRAIN), gc);
-  vtkTimerLog::MarkEndEvent("parallel");
+  tl->StartTimer();
+  vtkSMPTools::For(0, images.size(), GRAIN, gc);
+  tl->StopTimer();
 
-  vtkTimerLog::DumpLogWithIndents(&std::cout, 0.00001);
+  cout << "parallel: " << tl->GetElapsedTime() << endl;
 
   vtkNew<vtkMultiBlockDataSet> mb;
   mb->SetNumberOfBlocks(outputs.size());

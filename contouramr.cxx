@@ -21,7 +21,7 @@
 #include "vtkAMRFlashReader.h"
 #include "vtkCompositeDataIterator.h"
 #include "vtkMultiThreader.h"
-#include "vtkParallelUtilities.h"
+#include "vtkSMPTools.h"
 
 using namespace std;
 
@@ -70,7 +70,7 @@ int main(int argc, char* argv[])
 
   if (threadedCompositePipeline)
     {
-    vtkParallelUtilities::Initialize(numThreads);
+    vtkSMPTools::Initialize(numThreads);
     }
 
   string fname;
